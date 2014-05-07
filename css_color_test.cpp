@@ -14,7 +14,7 @@ int main (int argc, char** argv)
 
     std::string str(argv[1]);
 
-    typedef std::string::const_iterator iterator_type;
+    //typedef std::string::const_iterator iterator_type;
 
     auto & grammar = mapnik::css_color_grammar::expression;
     auto itr = str.begin();
