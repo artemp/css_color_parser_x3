@@ -1,0 +1,12 @@
+local BOOST_DIR = "/opt/boost" ;
+# local BOOST_SPIRIT_X3 = "/Users/artem/Projects/spirit_x3" ;
+local BOOST_SPIRIT_X3 = "/Users/artem/Projects/modular-boost/libs/spirit/include" ;
+local MAPNIK_DIR = "/opt/mapnik" ;
+
+exe css-color-test :
+    css_color_test.cpp
+    :
+    <include>$(BOOST_DIR)/include
+    <include>$(BOOST_SPIRIT_X3)
+    <include>$(MAPNIK_DIR)/include
+    ;
