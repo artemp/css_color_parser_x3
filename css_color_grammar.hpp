@@ -38,20 +38,9 @@ struct color
     std::uint8_t green_;
     std::uint8_t blue_;
     std::uint8_t alpha_;
-//public:
-    //inline std::uint8_t red() const { return red_ ;}
-    //inline std::uint8_t green() const { return green_ ;}
-    //inline std::uint8_t blue() const { return blue_ ;}
-    //inline std::uint8_t alpha() const { return alpha_ ;}
-    //inline void set_red(std::uint8_t red) { red_ = red;}
-    //inline void set_green(std::uint8_t green) { green_ = green;}
-    //inline void set_blue(std::uint8_t blue) { blue_ = blue;}
-    //inline void set_alpha(std::uint8_t alpha) { alpha_ = alpha;}
 };
 
 }
-
-//
 
 BOOST_FUSION_ADAPT_STRUCT (
     mapnik::color,
@@ -60,16 +49,6 @@ BOOST_FUSION_ADAPT_STRUCT (
     (std::uint8_t, blue_)
     (std::uint8_t, alpha_)
     )
-
-/*
-BOOST_FUSION_ADAPT_ADT(
-mapnik::color,
-    (unsigned, unsigned, obj.red(), obj.set_red(val))
-    (unsigned, unsigned, obj.green(), obj.set_green(val))
-    (unsigned, unsigned, obj.blue(), obj.set_blue(val))
-    (unsigned, unsigned, obj.alpha(), obj.set_alpha(val))
-    )
-*/
 
 struct fun_action
 {
