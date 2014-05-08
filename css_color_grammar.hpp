@@ -33,12 +33,13 @@
 
 namespace mapnik {
 
-struct color
+class color
 {
+public:
     color()
-        : red_(255),
-          green_(255),
-          blue_(255),
+        : red_(0),
+          green_(0),
+          blue_(0),
           alpha_(0) {}
 
     color (std::uint8_t red, std::uint8_t green, std::uint8_t blue, std::uint8_t alpha = 255)
@@ -47,6 +48,15 @@ struct color
           blue_(blue),
           alpha_(alpha) {}
 
+    inline std::uint8_t red() const { return red_ ;}
+    inline std::uint8_t green() const { return green_ ;}
+    inline std::uint8_t blue() const { return blue_ ;}
+    inline std::uint8_t alpha() const { return alpha_ ;}
+    inline void set_red(std::uint8_t red) { red_ = red;}
+    inline void set_green(std::uint8_t green) { green_ = green;}
+    inline void set_blue(std::uint8_t blue) { blue_ = blue;}
+    inline void set_alpha(std::uint8_t alpha) { alpha_ = alpha;}
+//private:
     std::uint8_t red_;
     std::uint8_t green_;
     std::uint8_t blue_;
@@ -63,6 +73,15 @@ BOOST_FUSION_ADAPT_STRUCT (
     (std::uint8_t, alpha_)
     )
 
+/*
+BOOST_FUSION_ADAPT_ADT(
+    mapnik::color,
+    (std::uint8_t, std::uint8_t, obj.red(), obj.set_red(val))
+    (std::uint8_t, std::uint8_t, obj.green(), obj.set_green(val))
+    (std::uint8_t, std::uint8_t, obj.blue(), obj.set_blue(val))
+    (std::uint8_t, std::uint8_t, obj.alpha(), obj.set_alpha(val))
+    )
+*/
 struct fun_action
 {
     template <typename T0, typename T1>
@@ -83,6 +102,7 @@ using x3::uint_parser;
 using x3::hex;
 using x3::symbols;
 using x3::omit;
+using x3::attr;
 
 symbols<char, mapnik::color> const named_colors =
 {
@@ -235,20 +255,22 @@ symbols<char, mapnik::color> const named_colors =
     {"transparent", mapnik::color(0, 0, 0, 0)}
 };
 
-x3::uint_parser<unsigned, 16, 2, 2> hex2;
-x3::uint_parser<unsigned, 16, 1, 1> hex1;
-x3::uint_parser<unsigned, 10, 1, 3> dec3;
+x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
+x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
+x3::uint_parser<std::uint8_t, 10, 1, 3> dec3;
 
-x3::rule<class css_color, mapnik::color> const css_color("css-color");
+x3::rule<x3::identity<class ss_color>, mapnik::color> const css_color("css-color");
 x3::rule<class named_color, mapnik::color> const named_color("named-color");
 x3::rule<class hex2_color, mapnik::color> const hex2_color("hex2-color");
 x3::rule<class hex1_color, mapnik::color> const hex1_color("hex1-color");
 x3::rule<class rgb_color, mapnik::color> const rgb_color("rgb-color");
+x3::rule<class rgb_color, mapnik::color> const rgba_color("rgba-color");
 
 auto const named_color_def = named_colors ;
-auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> -hex2 ;
-auto const hex1_color_def = lit('#') >> hex1 >> hex1 >> hex1 >> -hex1 ;
-auto const rgb_color_def = lit("rgb") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> -(lit(',') >> dec3) >> lit(')');
+auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
+auto const hex1_color_def = lit('#') >> hex1 >> hex1 >> hex1 >> (hex1 | attr(255));
+auto const rgb_color_def = lit("rgb") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> attr(255) >> lit(')');
+auto const rgba_color_def = lit("rgba") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> lit(')');
 auto const css_color_def = named_color | hex2_color | hex1_color | rgb_color;
 
 auto const expression = x3::grammar("css-color-grammar",
@@ -256,7 +278,8 @@ auto const expression = x3::grammar("css-color-grammar",
                                     hex2_color = hex2_color_def,
                                     hex1_color = hex1_color_def,
                                     named_color = named_color_def,
-                                    rgb_color = rgb_color_def
+                                    rgb_color = rgb_color_def,
+                                    rgba_color = rgba_color_def
     );
 
 }}

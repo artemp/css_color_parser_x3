@@ -14,8 +14,6 @@ int main (int argc, char** argv)
 
     std::string str(argv[1]);
 
-    //typedef std::string::const_iterator iterator_type;
-
     auto & grammar = mapnik::css_color_grammar::expression;
     auto itr = str.begin();
     auto end = str.end();
@@ -26,10 +24,10 @@ int main (int argc, char** argv)
     {
         std::cerr << "OK" << std::endl;
         std::cerr << "color("
-                  << (int)c.red_ << ","
-                  << (int)c.green_ << ","
-                  << (int)c.blue_ << ","
-                  << (int)c.alpha_ << ")"
+                  << (int)c.red() << ","
+                  << (int)c.green() << ","
+                  << (int)c.blue() << ","
+                  << (int)c.alpha() << ")"
                   << std::endl;
     }
     else
