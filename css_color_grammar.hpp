@@ -264,12 +264,12 @@ x3::uint_parser<std::uint8_t, 16, 2, 2> hex2;
 x3::uint_parser<std::uint8_t, 16, 1, 1> hex1;
 x3::uint_parser<std::uint8_t, 10, 1, 3> dec3;
 
-x3::rule<class css_color, mapnik::color> const css_color = {} ;
-x3::rule<class named_color, mapnik::color> const named_color = {} ;
-x3::rule<class hex2_color, mapnik::color> const hex2_color = {};
-x3::rule<class hex1_color, mapnik::color> const hex1_color = {} ;
-x3::rule<class rgb_color, mapnik::color> const rgb_color = {} ;
-x3::rule<class rgb_color, mapnik::color> const rgba_color = {};
+x3::rule<class css_color, mapnik::color> const css_color("css_color");
+x3::rule<class named_color, mapnik::color> const named_color("named_color");
+x3::rule<class hex2_color, mapnik::color> const hex2_color("hex2_color");
+x3::rule<class hex1_color, mapnik::color> const hex1_color("hex1_color");
+x3::rule<class rgb_color, mapnik::color> const rgb_color("rgb_color");
+x3::rule<class rgba_color, mapnik::color> const rgba_color("rgba_color");
 
 auto const named_color_def = named_colors ;
 auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
@@ -278,12 +278,14 @@ auto const rgb_color_def = lit("rgb") >> lit('(') >> dec3 >> lit(',') >> dec3 >>
 auto const rgba_color_def = lit("rgba") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> lit(')');
 auto const css_color_def = named_color | hex2_color | hex1_color | rgb_color;
 
-BOOST_SPIRIT_DEFINE(css_color,css_color_def);
-BOOST_SPIRIT_DEFINE(hex2_color,hex2_color_def);
-BOOST_SPIRIT_DEFINE(hex1_color,hex1_color_def);
-BOOST_SPIRIT_DEFINE(named_color,named_color_def);
-BOOST_SPIRIT_DEFINE(rgb_color,rgb_color_def);
-BOOST_SPIRIT_DEFINE(rgba_color,rgba_color_def);
+BOOST_SPIRIT_DEFINE(
+    css_color=css_color_def,
+    hex2_color=hex2_color_def,
+    hex1_color=hex1_color_def,
+    named_color=named_color_def,
+    rgb_color=rgb_color_def,
+    rgba_color=rgba_color_def
+    );
 
 auto const expression = css_color;
 
