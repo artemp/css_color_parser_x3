@@ -107,6 +107,7 @@ using x3::hex;
 using x3::symbols;
 using x3::omit;
 using x3::attr;
+using x3::double_;
 //using x3::no_case;
 
 symbols<char, mapnik::color> const named_colors =
@@ -270,12 +271,59 @@ x3::rule<class hex1_color, mapnik::color> const hex1_color("hex1_color");
 x3::rule<class rgb_color, mapnik::color> const rgb_color("rgb_color");
 x3::rule<class rgba_color, mapnik::color> const rgba_color("rgba_color");
 
+struct clip_double
+{
+    static double call(double val)
+    {
+        if (val > 1.0) return 1.0;
+        if (val < 0.0) return 0.0;
+        return val;
+    }
+};
+
+auto assign_red =
+    [](auto& ctx, uint8_t attr)
+    {
+        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+        val_ctx.red_ = attr;
+    }
+;
+
+auto assign_green =
+    [](auto& ctx, uint8_t attr)
+    {
+        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+        val_ctx.green_ = attr;
+    }
+;
+
+auto assign_blue =
+    [](auto& ctx, uint8_t attr)
+    {
+        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+        val_ctx.blue_ = attr;
+    }
+;
+
+auto convert_float =
+    [](auto& ctx, double attr)
+    {
+        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+        val_ctx.alpha_ = uint8_t((255.0 * clip_double::call(attr)) + 0.5);
+    }
+;
 
 auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
 auto const hex1_color_def = lit('#') >> hex1 >> hex1 >> hex1 >> (hex1 | attr(255));
 auto const rgb_color_def = lit("rgb") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> attr(255) >> lit(')');
-auto const rgba_color_def = lit("rgba") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> lit(')');
-auto const css_color_def = named_colors | hex2_color | hex1_color | rgb_color;
+
+auto const rgba_color_def = lit("rgba")
+    >> lit('(') >> dec3[assign_red]
+    >> lit(',') >> dec3[assign_green]
+    >> lit(',') >> dec3[assign_blue]
+    >> lit(',') >> double_[convert_float] >> lit(')');
+
+auto const css_color_def = named_colors | hex2_color | hex1_color | rgb_color | rgba_color;
 
 BOOST_SPIRIT_DEFINE(
     css_color=css_color_def,
