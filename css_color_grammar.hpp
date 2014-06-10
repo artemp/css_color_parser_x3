@@ -85,15 +85,6 @@ BOOST_FUSION_ADAPT_STRUCT (
 //    (std::uint8_t, std::uint8_t, obj.alpha(), obj.set_alpha(val))
 //    )
 
-struct fun_action
-{
-    template <typename T0, typename T1>
-    void operator()(T0 arg0, T1 arg1) const
-    {
-        std::cerr << typeid(T0).name() << " " << typeid(T1).name() << " " <<  std::endl;
-    }
-};
-
 namespace mapnik {
 
 namespace x3 = boost::spirit::x3;
