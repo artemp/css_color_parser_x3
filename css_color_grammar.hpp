@@ -280,55 +280,87 @@ struct clip_opacity
     }
 };
 
-auto dec_red = [](auto& ctx)
+struct dec_red
 {
-    _val(ctx).red_ = _attr(ctx);
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).red_ = _attr(ctx);
+    }
 };
 
-auto dec_green = [](auto& ctx)
+struct dec_green
 {
-    _val(ctx).green_ = _attr(ctx);
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).green_ = _attr(ctx);
+    }
 };
 
-auto dec_blue = [](auto& ctx)
+struct dec_blue
 {
-    _val(ctx).blue_ = _attr(ctx);
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).blue_ = _attr(ctx);
+    }
 };
 
-auto opacity = [](auto& ctx)
+struct opacity
 {
-    _val(ctx).alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
+    }
 };
 
-auto hex1_red = [](auto& ctx)
+struct hex1_red
 {
-    _val(ctx).red_ = _attr(ctx) | _attr(ctx) << 4;
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).red_ = _attr(ctx) | _attr(ctx) << 4;
+    }
 };
 
-auto hex1_green = [](auto& ctx)
+struct hex1_green
 {
-    _val(ctx).green_ = _attr(ctx) | _attr(ctx) << 4;
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).green_ = _attr(ctx) | _attr(ctx) << 4;
+    }
 };
 
-auto hex1_blue = [](auto& ctx)
+struct hex1_blue
 {
-    _val(ctx).blue_ = _attr(ctx) | _attr(ctx) << 4;
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).blue_ = _attr(ctx) | _attr(ctx) << 4;
+    }
 };
 
-auto hex1_opacity = [](auto& ctx)
+struct hex1_opacity
 {
-    _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
+    template <typename Context>
+    void operator() (Context const& ctx) const
+    {
+        _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
+    }
 };
 
 auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
-auto const hex1_color_def = lit('#') >> hex1[hex1_red] >> hex1[hex1_green] >> hex1[hex1_blue] >> (hex1[hex1_opacity] | attr(15)[hex1_opacity]);
+auto const hex1_color_def = lit('#') >> hex1[hex1_red()] >> hex1[hex1_green()] >> hex1[hex1_blue()] >> (hex1[hex1_opacity()] | attr(15)[hex1_opacity()]);
 auto const rgb_color_def = lit("rgb") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> attr(255) >> lit(')');
 
 auto const rgba_color_def = lit("rgba")
-    >> lit('(') >> dec3[dec_red]
-    >> lit(',') >> dec3[dec_green]
-    >> lit(',') >> dec3[dec_blue]
-    >> lit(',') >> double_[opacity] >> lit(')');
+    >> lit('(') >> dec3[dec_red()]
+    >> lit(',') >> dec3[dec_green()]
+    >> lit(',') >> dec3[dec_blue()]
+    >> lit(',') >> double_[opacity()] >> lit(')');
 
 auto const css_color_def = named_colors | hex2_color | hex1_color | rgb_color | rgba_color;
 
