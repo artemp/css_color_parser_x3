@@ -1,8 +1,5 @@
-# local BOOST_DIR = "/opt/boost" ;
 local BOOST_DIR = "/Users/artem/Projects/modular-boost" ;
-# local BOOST_SPIRIT_X3 = "/Users/artem/Projects/spirit_x3" ;
 local BOOST_SPIRIT_X3 = "/Users/artem/Projects/modular-boost/libs/spirit" ;
-# local BOOST_SPIRIT_X3 = "/Users/artem/Projects/spirit-experimental" ;
 local MAPNIK_DIR = "/opt/mapnik" ;
 
 exe css-color-test :

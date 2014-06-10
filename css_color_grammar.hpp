@@ -20,9 +20,8 @@
  *
  *****************************************************************************/
 
-
 // http://www.w3.org/TR/SVG2/color.html
-// TODO: should be rename to SVG2 color grammar
+// TODO: should be renamed to SVG2 color grammar ^^
 
 #ifndef MAPNIK_CSS_COLOR_GRAMMAR_HPP
 #define MAPNIK_CSS_COLOR_GRAMMAR_HPP
@@ -271,7 +270,7 @@ x3::rule<class hex1_color, mapnik::color> const hex1_color("hex1_color");
 x3::rule<class rgb_color, mapnik::color> const rgb_color("rgb_color");
 x3::rule<class rgba_color, mapnik::color> const rgba_color("rgba_color");
 
-struct clip_double
+struct clip_opacity
 {
     static double call(double val)
     {
@@ -281,37 +280,29 @@ struct clip_double
     }
 };
 
-auto assign_red =
-    [](auto& ctx, uint8_t attr)
-    {
-        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-        val_ctx.red_ = attr;
-    }
-;
+auto assign_red = [](auto& ctx)
+{
+    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+    val_ctx.red_ = _attr(ctx);
+};
 
-auto assign_green =
-    [](auto& ctx, uint8_t attr)
-    {
-        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-        val_ctx.green_ = attr;
-    }
-;
+auto assign_green = [](auto& ctx)
+{
+    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+    val_ctx.green_ = _attr(ctx);
+};
 
-auto assign_blue =
-    [](auto& ctx, uint8_t attr)
-    {
-        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-        val_ctx.blue_ = attr;
-    }
-;
+auto assign_blue = [](auto& ctx)
+{
+    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+    val_ctx.blue_ = _attr(ctx);
+};
 
-auto convert_float =
-    [](auto& ctx, double attr)
-    {
-        auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-        val_ctx.alpha_ = uint8_t((255.0 * clip_double::call(attr)) + 0.5);
-    }
-;
+auto convert_opacity = [](auto& ctx)
+{
+    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
+    val_ctx.alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
+};
 
 auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
 auto const hex1_color_def = lit('#') >> hex1 >> hex1 >> hex1 >> (hex1 | attr(255));
@@ -321,7 +312,7 @@ auto const rgba_color_def = lit("rgba")
     >> lit('(') >> dec3[assign_red]
     >> lit(',') >> dec3[assign_green]
     >> lit(',') >> dec3[assign_blue]
-    >> lit(',') >> double_[convert_float] >> lit(')');
+    >> lit(',') >> double_[convert_opacity] >> lit(')');
 
 auto const css_color_def = named_colors | hex2_color | hex1_color | rgb_color | rgba_color;
 
