@@ -280,39 +280,55 @@ struct clip_opacity
     }
 };
 
-auto assign_red = [](auto& ctx)
+auto dec_red = [](auto& ctx)
 {
-    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-    val_ctx.red_ = _attr(ctx);
+    _val(ctx).red_ = _attr(ctx);
 };
 
-auto assign_green = [](auto& ctx)
+auto dec_green = [](auto& ctx)
 {
-    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-    val_ctx.green_ = _attr(ctx);
+    _val(ctx).green_ = _attr(ctx);
 };
 
-auto assign_blue = [](auto& ctx)
+auto dec_blue = [](auto& ctx)
 {
-    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-    val_ctx.blue_ = _attr(ctx);
+    _val(ctx).blue_ = _attr(ctx);
 };
 
-auto convert_opacity = [](auto& ctx)
+auto opacity = [](auto& ctx)
 {
-    auto & val_ctx = x3::get<x3::rule_val_context_tag>(ctx);
-    val_ctx.alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
+    _val(ctx).alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
+};
+
+auto hex1_red = [](auto& ctx)
+{
+    _val(ctx).red_ = _attr(ctx) | _attr(ctx) << 4;
+};
+
+auto hex1_green = [](auto& ctx)
+{
+    _val(ctx).green_ = _attr(ctx) | _attr(ctx) << 4;
+};
+
+auto hex1_blue = [](auto& ctx)
+{
+    _val(ctx).blue_ = _attr(ctx) | _attr(ctx) << 4;
+};
+
+auto hex1_opacity = [](auto& ctx)
+{
+    _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
 auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
-auto const hex1_color_def = lit('#') >> hex1 >> hex1 >> hex1 >> (hex1 | attr(255));
+auto const hex1_color_def = lit('#') >> hex1[hex1_red] >> hex1[hex1_green] >> hex1[hex1_blue] >> (hex1[hex1_opacity] | attr(15)[hex1_opacity]);
 auto const rgb_color_def = lit("rgb") >> lit('(') >> dec3 >> lit(',') >> dec3 >> lit(',') >> dec3 >> attr(255) >> lit(')');
 
 auto const rgba_color_def = lit("rgba")
-    >> lit('(') >> dec3[assign_red]
-    >> lit(',') >> dec3[assign_green]
-    >> lit(',') >> dec3[assign_blue]
-    >> lit(',') >> double_[convert_opacity] >> lit(')');
+    >> lit('(') >> dec3[dec_red]
+    >> lit(',') >> dec3[dec_green]
+    >> lit(',') >> dec3[dec_blue]
+    >> lit(',') >> double_[opacity] >> lit(')');
 
 auto const css_color_def = named_colors | hex2_color | hex1_color | rgb_color | rgba_color;
 
