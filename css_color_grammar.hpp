@@ -321,7 +321,7 @@ auto const rgba_color_def = lit("rgba")
     >> lit(',') >> dec3[dec_blue]
     >> lit(',') >> double_[opacity] >> lit(')');
 
-auto const css_color_def = named_colors | hex2_color | hex1_color | rgb_color | rgba_color;
+auto const css_color_def = no_case[named_colors] | hex2_color | hex1_color | rgb_color | rgba_color;
 
 BOOST_SPIRIT_DEFINE(
     css_color=css_color_def,
