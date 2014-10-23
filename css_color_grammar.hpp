@@ -98,9 +98,9 @@ using x3::symbols;
 using x3::omit;
 using x3::attr;
 using x3::double_;
-//using x3::no_case;
+using x3::no_case;
 
-symbols<char, mapnik::color> const named_colors =
+symbols<mapnik::color> const named_colors =
 {
     {"aliceblue", mapnik::color(240, 248, 255)},
     {"antiquewhite", mapnik::color(250, 235, 215)},
