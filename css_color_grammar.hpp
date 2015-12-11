@@ -31,6 +31,7 @@
 //#include <boost/fusion/adapted/adt.hpp>
 //#include <boost/fusion/adapted/struct.hpp>
 #include <mapnik/color.hpp>
+#include <mapnik/safe_cast.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 // stl
 #include <string>
@@ -233,6 +234,8 @@ x3::rule<class hex2_color, mapnik::color> const hex2_color("hex2_color");
 x3::rule<class hex1_color, mapnik::color> const hex1_color("hex1_color");
 x3::rule<class rgb_color, mapnik::color> const rgb_color("rgb_color");
 x3::rule<class rgba_color, mapnik::color> const rgba_color("rgba_color");
+x3::rule<class rgb_color_percent, mapnik::color> const rgb_color_percent("rgb_color_percent");
+x3::rule<class rgba_color_percent, mapnik::color> const rgba_color_percent("rgba_color_percent");
 
 struct clip_opacity
 {
@@ -241,6 +244,14 @@ struct clip_opacity
         if (val > 1.0) return 1.0;
         if (val < 0.0) return 0.0;
         return val;
+    }
+};
+
+struct percent_converter
+{
+    static std::uint8_t call(double val)
+    {
+        return safe_cast<std::uint8_t>(std::lround((255.0 * val)/100.0));
     }
 };
 
@@ -264,6 +275,21 @@ auto opacity = [](auto& ctx)
     _val(ctx).alpha_ = uint8_t((255.0 * clip_opacity::call(_attr(ctx))) + 0.5);
 };
 
+auto percent_red = [] (auto & ctx)
+{
+    _val(ctx).red_ = percent_converter::call(_attr(ctx));
+};
+
+auto percent_green = [] (auto & ctx)
+{
+    _val(ctx).green_ = percent_converter::call(_attr(ctx));
+};
+
+auto percent_blue = [] (auto & ctx)
+{
+    _val(ctx).blue_ = percent_converter::call(_attr(ctx));
+};
+
 auto hex1_red = [](auto& ctx)
 {
     _val(ctx).red_ = _attr(ctx) | _attr(ctx) << 4;
@@ -284,24 +310,61 @@ auto hex1_opacity = [](auto& ctx)
     _val(ctx).alpha_ = _attr(ctx) | _attr(ctx) << 4;
 };
 
-auto const hex2_color_def = lit('#') > hex2 > hex2 > hex2 > (hex2 | attr(255)) ;
-auto const hex1_color_def = lit('#') > hex1[hex1_red] > hex1[hex1_green] > hex1[hex1_blue] > (hex1[hex1_opacity] | attr(15)[hex1_opacity]);
-auto const rgb_color_def = lit("rgb") > lit('(') > dec3 > lit(',') > dec3 > lit(',') > dec3 > attr(255) > lit(')');
+auto const hex2_color_def = lit('#') >> hex2 >> hex2 >> hex2 >> (hex2 | attr(255)) ;
+
+auto const hex1_color_def = lit('#')
+    >> hex1[hex1_red]
+    >> hex1[hex1_green]
+    >> hex1[hex1_blue]
+    >> (hex1[hex1_opacity] | attr(15)[hex1_opacity]);
+
+auto const rgb_color_def = lit("rgb")
+    >> lit('(') >> dec3
+    >> lit(',') >> dec3
+    >> lit(',') >> dec3
+    >> attr(255) >> lit(')')
+    ;
+auto const rgb_color_percent_def = lit("rgb")
+    >> lit('(') >> double_[percent_red] >> lit('%')
+    >> lit(',') >> double_[percent_green] >> lit('%')
+    >> lit(',') >> double_[percent_blue] >> lit('%')
+    >> attr(255) >> lit(')');
 
 auto const rgba_color_def = lit("rgba")
-    > lit('(') > dec3[dec_red]
-    > lit(',') > dec3[dec_green]
-    > lit(',') > dec3[dec_blue]
-    > lit(',') > double_[opacity] > lit(')');
+    >> lit('(') >> dec3[dec_red]
+    >> lit(',') >> dec3[dec_green]
+    >> lit(',') >> dec3[dec_blue]
+    >> lit(',') >> double_[opacity] >> lit(')');
 
-auto const css_color_def = no_case[named_colors] | hex2_color | hex1_color | rgb_color | rgba_color;
+auto const rgba_color_percent_def = lit("rgba")
+    >> lit('(') >> double_[percent_red] >> lit('%')
+    >> lit(',') >> double_[percent_green] >> lit('%')
+    >> lit(',') >> double_[percent_blue] >> lit('%')
+    >> lit(',') >> double_[opacity] >> lit(')');
+
+auto const css_color_def = no_case[named_colors]
+         |
+         hex2_color
+         |
+         hex1_color
+         |
+         rgb_color
+         |
+         rgba_color
+         |
+         rgb_color_percent
+         |
+         rgba_color_percent
+         ;
 
 BOOST_SPIRIT_DEFINE(
     css_color,
     hex2_color,
     hex1_color,
     rgb_color,
-    rgba_color
+    rgba_color,
+    rgb_color_percent,
+    rgba_color_percent
     );
 
 auto const expression = css_color;
