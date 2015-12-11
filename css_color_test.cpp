@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
-#include "css_color_grammar.hpp"
+#include <mapnik/config.hpp>
+#include <mapnik/svg2_color_grammar_def.hpp>
 
 int main (int argc, char** argv)
 {
@@ -14,7 +15,7 @@ int main (int argc, char** argv)
 
     std::string str(argv[1]);
 
-    auto & grammar = mapnik::css_color_grammar::expression;
+    auto & grammar = mapnik::svg2_color_grammar::expression;
     auto itr = str.begin();
     auto end = str.end();
     using namespace boost::spirit::x3::ascii;
